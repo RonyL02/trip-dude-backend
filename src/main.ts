@@ -1,8 +1,12 @@
-import { initApp } from "./app";
+import { initApp, initSwagger } from "./app";
 import { Env } from "./env";
 
 const start = async () => {
     const app = await initApp();
+
+    if (Env.NODE_ENV !== 'test') {
+        initSwagger(app);
+    }
 
     const port = Env.PORT;
 
