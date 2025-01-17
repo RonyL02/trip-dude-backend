@@ -1,15 +1,13 @@
-import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
+import { Env, verifyEnvVariables } from './env';
 
-dotenv.config();
+verifyEnvVariables();
 
 const initDB = async () => {
-    const dbConnectionUrl = process.env.DB_CONNECTION_URL;
-
     try {
-        await mongoose.connect(dbConnectionUrl!);
+        await mongoose.connect(Env.DB_CONNECTION_URL);
         console.log('connected to db')
     } catch (error) {
         console.error(`failed connecting to db: ${error}`);
