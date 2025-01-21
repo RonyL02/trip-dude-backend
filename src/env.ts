@@ -15,7 +15,11 @@ const nonTestEnvVars: EnvKey[] = ['GEMINI_API_KEY'];
 
 export const verifyEnvVariables = () => {
   Object.entries(Env).forEach(([key, value]) => {
-    if (value === '' && !nonTestEnvVars.includes(key as EnvKey)) {
+    if (value === '') {
+      if (Env.NODE_ENV === 'test' && nonTestEnvVars.includes(key as EnvKey)) {
+        return;
+      }
+
       throw new Error(`Environment variable ${key} is undefined`);
     }
   });
