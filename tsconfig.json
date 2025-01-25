@@ -8,6 +8,7 @@
     "outDir": "build",
     "strict": true,
     "resolveJsonModule": true,
+    "noImplicitAny": false
   },
   "lib": [
     "es2015"
