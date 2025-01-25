@@ -8,7 +8,8 @@ export const Env = {
   NODE_ENV: process.env.NODE_ENV!,
   GEMINI_API_KEY: process.env.GEMINI_API_KEY!,
   AMADEUS_API_KEY: process.env.AMADEUS_API_KEY!,
-  AMADEUS_SECRET: process.env.AMADEUS_SECRET!
+  AMADEUS_SECRET: process.env.AMADEUS_SECRET!,
+  OSM_URL: process.env.OSM_URL!
 };
 
 type EnvKey = keyof typeof Env;
@@ -16,7 +17,8 @@ type EnvKey = keyof typeof Env;
 const nonTestEnvVars: EnvKey[] = [
   'GEMINI_API_KEY',
   'AMADEUS_API_KEY',
-  'AMADEUS_SECRET'
+  'AMADEUS_SECRET',
+  'OSM_URL'
 ];
 
 export const verifyEnvVariables = () => {
