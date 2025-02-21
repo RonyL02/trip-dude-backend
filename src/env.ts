@@ -9,7 +9,11 @@ export const Env = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY!,
   AMADEUS_API_KEY: process.env.AMADEUS_API_KEY!,
   AMADEUS_SECRET: process.env.AMADEUS_SECRET!,
-  OSM_URL: process.env.OSM_URL!
+  OSM_URL: process.env.OSM_URL!,
+  JWT_TOKEN_EXPIRATION: process.env.JWT_TOKEN_EXPIRATION!,
+  REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION!,
+  ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET!,
+  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET!
 };
 
 type EnvKey = keyof typeof Env;
