@@ -51,7 +51,7 @@ export const initApp = async () => {
     response.send('trip-dude backend is up and running!');
   });
 
-  app.use('auth', AuthRouter);
+  app.use('/auth', AuthRouter);
 
   return app;
 };
