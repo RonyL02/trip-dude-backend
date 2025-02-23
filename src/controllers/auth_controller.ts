@@ -8,6 +8,7 @@ import { genSalt, hash } from 'bcrypt';
 import { sendError } from '../utils';
 import { IUser, UserModel } from '../models/user_model';
 import { Env } from '../env';
+import GoogleAuthClient from '../external_apis/googleAuth';
 
 class AuthController extends BaseController<IUser> {
   constructor() {
@@ -109,6 +110,25 @@ class AuthController extends BaseController<IUser> {
       response.send({ accessToken, refreshToken, userId: user._id });
     } catch (error) {
       return sendError(response, StatusCodes.INTERNAL_SERVER_ERROR, `${error}`);
+    }
+  }
+
+  async loginWithGoogle(request: Request, response: Response) {
+    const credential = request.body.credential;
+
+    try {
+      const ticket = await GoogleAuthClient.verifyIdToken({
+        idToken: credential,
+        audience: Env.GOOGLE_CLIENT_ID
+      });
+      const payload = ticket.getPayload();
+      console.log(payload);
+    } catch (error) {
+      return sendError(
+        response,
+        StatusCodes.BAD_REQUEST,
+        `google auth failed: ${error}`
+      );
     }
   }
 

@@ -13,7 +13,8 @@ export const Env = {
   JWT_TOKEN_EXPIRATION: process.env.JWT_TOKEN_EXPIRATION!,
   REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION!,
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET!,
-  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET!
+  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET!,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!
 };
 
 type EnvKey = keyof typeof Env;
@@ -22,7 +23,8 @@ const nonTestEnvVars: EnvKey[] = [
   'GEMINI_API_KEY',
   'AMADEUS_API_KEY',
   'AMADEUS_SECRET',
-  'OSM_URL'
+  'OSM_URL',
+  'GOOGLE_CLIENT_ID'
 ];
 
 export const verifyEnvVariables = () => {
