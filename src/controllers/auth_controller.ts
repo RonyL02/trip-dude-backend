@@ -121,8 +121,39 @@ class AuthController extends BaseController<IUser> {
         idToken: credential,
         audience: Env.GOOGLE_CLIENT_ID
       });
-      const payload = ticket.getPayload();
-      console.log(payload);
+      const googlePayload = ticket.getPayload();
+
+      if (!googlePayload?.email) {
+        return sendError(
+          response,
+          StatusCodes.BAD_REQUEST,
+          `google auth failed: email not found`
+        );
+      }
+
+      const user = await this.model.findOne({ email: googlePayload.email });
+
+      if (!user) {
+        return sendError(
+          response,
+          StatusCodes.BAD_REQUEST,
+          'user does not exist'
+        );
+      }
+
+      const payload: JwtPayload = { _id: user._id };
+      const { accessToken, refreshToken } = this.generateTokens(payload);
+
+      const updatedTokens =
+        user.tokens.length === 0
+          ? [refreshToken]
+          : [...user.tokens, refreshToken];
+
+      await this.model.findByIdAndUpdate(user._id, {
+        tokens: updatedTokens
+      });
+
+      response.send({ accessToken, refreshToken, userId: user._id });
     } catch (error) {
       return sendError(
         response,

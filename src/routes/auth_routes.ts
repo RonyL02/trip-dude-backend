@@ -118,6 +118,46 @@ AuthRouter.post('/login', AuthController.login.bind(AuthController));
 
 /**
  * @swagger
+ * /auth/google-login:
+ *   post:
+ *     summary: Login with Google OAuth
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: header
+ *         name: credential
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Google OAuth credential token
+ *     responses:
+ *       200:
+ *         description: Successful login
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 refreshToken:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 userId:
+ *                   type: string
+ *                   example: 60d0fe4f5311236168a109ca
+ *       400:
+ *         description: Invalid credentials or request
+ *       500:
+ *         description: Server error
+ */
+AuthRouter.post(
+  '/google-login',
+  AuthController.loginWithGoogle.bind(AuthController)
+);
+
+/**
+ * @swagger
  * /auth/refreshToken:
  *   post:
  *     summary: Refresh tokens
