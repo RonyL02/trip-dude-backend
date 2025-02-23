@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import { Env, verifyEnvVariables } from './env';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
+import AuthRouter from './routes/auth_routes';
 
 verifyEnvVariables();
 
@@ -26,7 +27,7 @@ export const initSwagger = (app: Express) => {
         description: 'REST server for the Trip Dude Application'
       }
     },
-    apis: ['./src/*.ts']
+    apis: ['./src/routes/*.ts']
   };
   const specs = swaggerJSDoc(options);
 
@@ -49,6 +50,8 @@ export const initApp = async () => {
   app.get('/health', (_request: Request, response: Response) => {
     response.send('trip-dude backend is up and running!');
   });
+
+  app.use('/auth', AuthRouter);
 
   return app;
 };
