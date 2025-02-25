@@ -5,6 +5,7 @@ import { Env, verifyEnvVariables } from './env';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
 import AuthRouter from './routes/auth_routes';
+import cors from 'cors';
 
 verifyEnvVariables();
 
@@ -38,6 +39,7 @@ export const initApp = async () => {
   await initDB();
 
   const app = express();
+  app.use(cors());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
