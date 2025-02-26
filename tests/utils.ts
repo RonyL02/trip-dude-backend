@@ -7,7 +7,7 @@ export const createUser = async (
   app: Express,
   user: TestUser
 ): Promise<string> => {
-  const response = await request(app).post('/users').send(user);
+  const response = await request(app).post('/auth/register').send(user);
   return response.body.newId;
 };
 

@@ -5,6 +5,7 @@ import { Env, verifyEnvVariables } from './env';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
 import AuthRouter from './routes/auth_routes';
+import PostRouter from './routes/post_routes';
 
 verifyEnvVariables();
 
@@ -52,6 +53,7 @@ export const initApp = async () => {
   });
 
   app.use('/auth', AuthRouter);
+  app.use('/posts', PostRouter);
 
   return app;
 };

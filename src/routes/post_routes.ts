@@ -163,4 +163,4 @@ PostRouter.get('/:id', postController.findById.bind(postController));
  */
 PostRouter.post('/', postController.create.bind(postController));
 
-export { PostRouter };
+export default PostRouter;
