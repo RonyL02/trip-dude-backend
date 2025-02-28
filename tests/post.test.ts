@@ -62,7 +62,6 @@ describe('Posts API Tests', () => {
       .send(testPost);
 
     expect(response.statusCode).toBe(StatusCodes.CREATED);
-    expect(response.body.description).toBe(testPost.description);
     expect(response.body.newId).toBeDefined();
     testPost._id = response.body.newId;
   });
@@ -74,7 +73,6 @@ describe('Posts API Tests', () => {
 
     expect(response.statusCode).toBe(StatusCodes.OK);
     expect(response.body.description).toBe(testPost.description);
-    expect(response.body.likes).toBe(testPost.likes);
   });
 
   test('Get post by non-existent ID', async () => {
@@ -90,7 +88,6 @@ describe('Posts API Tests', () => {
     const updatedData = {
       imageUrl: 'https://example.com/new-image.jpg',
       description: 'Updated description',
-      likes: 20,
       activityId: 'activityNew'
     };
 
@@ -106,7 +103,6 @@ describe('Posts API Tests', () => {
       .set('Authorization', `JWT ${accessToken}`);
 
     expect(updatedPost.body.description).toBe(updatedData.description);
-    expect(updatedPost.body.likes).toBe(updatedData.likes);
   });
 
   test('Attempt to create invalid post', async () => {
@@ -118,5 +114,33 @@ describe('Posts API Tests', () => {
       .send(invalidPost);
 
     expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
+  });
+
+  test('Like a post', async () => {
+    const postRespons = await request(app)
+      .get(`${baseUrl}/${testPost._id}`)
+      .set('Authorization', `JWT ${accessToken}`);
+
+    const likes = postRespons.body.likes;
+
+    const response = await request(app)
+      .post(`${baseUrl}/${testPost._id}/like`)
+      .set('Authorization', `JWT ${accessToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
+    const updatedPost = await request(app)
+      .get(`${baseUrl}/${testPost._id}`)
+      .set('Authorization', `JWT ${accessToken}`);
+
+    expect(updatedPost.body.likes).toBe(likes + 1);
+  });
+
+  test('Like a post that does not exist', async () => {
+    const fakeId = new mongoose.Types.ObjectId().toString();
+    const response = await request(app)
+      .post(`${baseUrl}/${fakeId}/like`)
+      .set('Authorization', `JWT ${accessToken}`);
+
+    expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
   });
 });

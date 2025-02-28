@@ -5,116 +5,7 @@ import { authenticationMiddleware } from '../middlewares/authentication_middlewa
 const postController = new PostController();
 const PostRouter = express.Router();
 
-/**
- * @swagger
- * tags:
- *   name: Posts
- *   description: The Posts API
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Post:
- *       type: object
- *       required:
- *         - userId
- *         - imageUrl
- *         - description
- *         - likes
- *         - activityId
- *       properties:
- *         _id:
- *           type: string
- *           description: The auto-generated id of the post
- *         userId:
- *           type: string
- *           description: The ID of the user who created the post
- *         imageUrl:
- *           type: string
- *           description: URL of the image
- *         description:
- *           type: string
- *           description: Description of the post
- *         likes:
- *           type: number
- *           description: Number of likes the post received
- *         activityId:
- *           type: string
- *           description: Related activity ID
- *       example:
- *         _id: 234ab456bc78
- *         userId: user12345
- *         imageUrl: https://example.com/image.jpg
- *         description: "Beautiful view of the ocean"
- *         likes: 125
- *         activityId: activity9876
- */
-
 PostRouter.use(authenticationMiddleware);
-
-/**
- * @swagger
- * /posts:
- *   get:
- *     summary: Get all posts
- *     tags:
- *       - Posts
- *     parameters:
- *       - in: header
- *         name: Authorization
- *         schema:
- *           type: string
- *         required: true
- *         description: The user token
- *     responses:
- *       200:
- *         description: A list of posts
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Post'
- *       500:
- *         description: Server error
- */
-PostRouter.get('/', postController.find.bind(postController));
-
-/**
- * @swagger
- * /posts/{id}:
- *   get:
- *     summary: Get a post by ID
- *     tags:
- *       - Posts
- *     parameters:
- *       - in: header
- *         name: Authorization
- *         schema:
- *           type: string
- *         required: true
- *         description: The user token
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The post id
- *     responses:
- *       200:
- *         description: A single post
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Post'
- *       404:
- *         description: Post not found
- *       500:
- *         description: Server error
- */
-PostRouter.get('/:id', postController.findById.bind(postController));
 
 /**
  * @swagger
@@ -137,22 +28,15 @@ PostRouter.get('/:id', postController.findById.bind(postController));
  *           schema:
  *             type: object
  *             properties:
- *               userId:
+ *               image:
  *                 type: string
- *               imageUrl:
- *                 type: string
+ *                 description: Image URL of the post
  *               description:
  *                 type: string
- *               likes:
- *                 type: number
- *               activityId:
- *                 type: string
+ *                 description: Description of the post
  *             required:
- *               - userId
- *               - imageUrl
+ *               - image
  *               - description
- *               - likes
- *               - activityId
  *     responses:
  *       201:
  *         description: Post created successfully
@@ -162,5 +46,180 @@ PostRouter.get('/:id', postController.findById.bind(postController));
  *         description: Server error
  */
 PostRouter.post('/', postController.create.bind(postController));
+
+/**
+ * @swagger
+ * /posts/{id}/like:
+ *   post:
+ *     summary: Like a post
+ *     tags:
+ *       - Posts
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user token
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The post ID
+ *     responses:
+ *       200:
+ *         description: Post liked successfully
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Server error
+ */
+PostRouter.post('/:id/like', postController.like.bind(postController));
+
+/**
+ * @swagger
+ * /posts:
+ *   get:
+ *     summary: Get posts with optional filters
+ *     tags:
+ *       - Posts
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user token
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Filter posts by user ID
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: The page number
+ *       - in: query
+ *         name: size
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: The number of posts per page
+ *     responses:
+ *       200:
+ *         description: A list of posts
+ *       500:
+ *         description: Server error
+ */
+PostRouter.get('/', postController.find.bind(postController));
+
+/**
+ * @swagger
+ * /posts/{id}:
+ *   patch:
+ *     summary: Update a post
+ *     tags:
+ *       - Posts
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user token
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The post ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 description: Updated image URL
+ *               description:
+ *                 type: string
+ *                 description: Updated description
+ *     responses:
+ *       200:
+ *         description: Post updated successfully
+ *       400:
+ *         description: Invalid input
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Server error
+ */
+PostRouter.patch('/:id', postController.updatePost.bind(postController));
+
+/**
+ * @swagger
+ * /posts/{id}:
+ *   delete:
+ *     summary: Delete a post
+ *     tags:
+ *       - Posts
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user token
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The post ID
+ *     responses:
+ *       200:
+ *         description: Post deleted successfully
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Server error
+ */
+PostRouter.delete('/:id', postController.delete.bind(postController));
+
+/**
+ * @swagger
+ * /posts/{id}:
+ *   get:
+ *     summary: Get a post by ID
+ *     tags:
+ *       - Posts
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user token
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The post ID
+ *     responses:
+ *       200:
+ *         description: A post
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Server error
+ */
+PostRouter.get('/:id', postController.findById.bind(postController));
 
 export default PostRouter;

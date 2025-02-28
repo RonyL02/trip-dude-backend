@@ -12,10 +12,6 @@ export type IPost = {
 const Schema = mongoose.Schema;
 
 const postSchema = new Schema({
-  _id: {
-    type: String,
-    required: true
-  },
   userId: {
     type: String,
     required: true
