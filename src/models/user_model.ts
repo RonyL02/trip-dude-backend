@@ -6,6 +6,9 @@ export type IUser = {
   email: string;
   _id: string;
   tokens: string[];
+  imageUrl: string;
+  likedPosts: string[];
+  activities: string[];
 };
 
 const Schema = mongoose.Schema;
@@ -26,6 +29,18 @@ const userSchema = new Schema({
   },
   tokens: {
     type: [String],
+    default: []
+  },
+  imageUrl: {
+    required: false,
+    type: String
+  },
+  likedPosts: {
+    tyle: [String],
+    default: []
+  },
+  activities: {
+    tyle: [String],
     default: []
   }
 });
