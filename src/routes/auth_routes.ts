@@ -121,7 +121,8 @@ AuthRouter.post('/login', AuthController.login.bind(AuthController));
  * /auth/google-login:
  *   post:
  *     summary: Login with Google OAuth
- *     tags: [Authentication]
+ *     tags:
+ *     - Auth
  *     parameters:
  *       - in: header
  *         name: credential
