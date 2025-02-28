@@ -9,6 +9,7 @@ import { sendError } from '../utils';
 import { IUser, UserModel } from '../models/user_model';
 import { Env } from '../env';
 import GoogleAuthClient from '../external_apis/googleAuth';
+import { randomBytes } from 'crypto';
 
 class AuthController extends BaseController<IUser> {
   constructor() {
@@ -131,14 +132,14 @@ class AuthController extends BaseController<IUser> {
         );
       }
 
-      const user = await this.model.findOne({ email: googlePayload.email });
+      let user = await this.model.findOne({ email: googlePayload.email });
 
       if (!user) {
-        return sendError(
-          response,
-          StatusCodes.BAD_REQUEST,
-          'user does not exist'
-        );
+        user = await this.model.create({
+          email: googlePayload.email,
+          username: googlePayload.email.split('@')[0],
+          password: randomBytes(32).toString('hex')
+        });
       }
 
       const payload: JwtPayload = { _id: user._id };

@@ -14,7 +14,8 @@ export const Env = {
   REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION!,
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET!,
   REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET!,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
+  DOMAIN_BASE: process.env.DOMAIN_BASE!
 };
 
 type EnvKey = keyof typeof Env;

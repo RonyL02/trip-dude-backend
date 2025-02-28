@@ -6,6 +6,8 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
 import AuthRouter from './routes/auth_routes';
 import PostRouter from './routes/post_routes';
+import cors from 'cors';
+import FileRouter from './routes/file_routes';
 
 verifyEnvVariables();
 
@@ -39,6 +41,7 @@ export const initApp = async () => {
   await initDB();
 
   const app = express();
+  app.use(cors());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -54,6 +57,9 @@ export const initApp = async () => {
 
   app.use('/auth', AuthRouter);
   app.use('/posts', PostRouter);
+  app.use('/files', FileRouter);
+
+  app.use('/storage', express.static('storage'));
 
   return app;
 };
