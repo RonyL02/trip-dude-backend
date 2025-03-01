@@ -162,7 +162,7 @@ CommentRouter.get('/', commentController.find.bind(commentController));
  *         description: Server error
  */
 
-CommentRouter.put('/:id', commentController.update.bind(commentController));
+CommentRouter.patch('/:id', commentController.update.bind(commentController));
 
 /**
  * @swagger
@@ -232,4 +232,4 @@ CommentRouter.delete('/:id', commentController.delete.bind(commentController));
 
 CommentRouter.get('/:id', commentController.findById.bind(commentController));
 
-export default CommentRouter ;
+export default CommentRouter;

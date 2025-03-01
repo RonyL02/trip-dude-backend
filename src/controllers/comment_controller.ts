@@ -10,7 +10,7 @@ export class CommentController extends BaseController<IComment> {
   async create(request: RequestWithUser, response: Response) {
     const newComment = {
       ...request.body,
-      senderId: request.user!._id
+      userId: request.user!._id
     };
 
     request.body = newComment;

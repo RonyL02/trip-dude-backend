@@ -2,25 +2,23 @@ import request from 'supertest';
 import mongoose from 'mongoose';
 import { Express } from 'express';
 import { initApp } from '../src/app';
-import { CommentModel, IComment } from '../src/models/comment_model';
+import { CommentModel } from '../src/models/comment_model';
 import { StatusCodes } from 'http-status-codes';
 import { UserModel } from '../src/models/user_model';
 import { createUser, loginUser } from './utils';
-
+import testCommentsJson from './test_data/test_comments.json';
+import { TestComment, TestUser } from './types';
 const baseUrl = '/comments';
 
-type TestComment = Omit<IComment, 'userId'> & { userId?: string };
-
 let app: Express;
-const testCommentJson: TestComment[] = [];
-const testComments: TestComment[] = testCommentJson;
+const testComments: TestComment[] = testCommentsJson;
 
-let userId: string | undefined;
-void userId;
-const userCredentials = {
-  email: 'sdfds@dsf.sdf',
-  password: 'sdfsdfsd'
+const testUser: TestUser = {
+  email: 'user@test.com',
+  password: 'password123',
+  username: 'testuser'
 };
+
 let accessToken: string | undefined;
 
 beforeAll(async () => {
@@ -28,19 +26,12 @@ beforeAll(async () => {
   app = await initApp();
   await CommentModel.deleteMany();
   await UserModel.deleteMany();
-  userId = await createUser(app, {
-    ...userCredentials,
-    username: 'sdfsdfd',
-    _id: new mongoose.Types.ObjectId().toString()
-  });
+  const userId = await createUser(app, testUser);
+  testUser._id = userId;
 });
 
 beforeEach(async () => {
-  const responseBody = await loginUser(
-    app,
-    userCredentials.email,
-    userCredentials.password
-  );
+  const responseBody = await loginUser(app, testUser.email, testUser.password);
   accessToken = responseBody.accessToken;
 });
 
@@ -114,7 +105,7 @@ describe('Comments API Tests', () => {
   test('Update a comment', async () => {
     const updatedComment = { content: 'Updated content' };
     const response = await request(app)
-      .put(`${baseUrl}/${testComments[0]._id}`)
+      .patch(`${baseUrl}/${testComments[0]._id}`)
       .set('Authorization', `JWT ${accessToken}`)
       .send(updatedComment);
 
