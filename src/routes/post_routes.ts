@@ -160,7 +160,7 @@ PostRouter.get('/', postController.find.bind(postController));
  *       500:
  *         description: Server error
  */
-PostRouter.patch('/:id', postController.updatePost.bind(postController));
+PostRouter.patch('/:id', postController.update.bind(postController));
 
 /**
  * @swagger

@@ -116,23 +116,37 @@ describe('Posts API Tests', () => {
     expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   });
 
-  test('Like a post', async () => {
-    const postRespons = await request(app)
+  test('Like a post and dislike', async () => {
+    const getPostResponse = await request(app)
       .get(`${baseUrl}/${testPost._id}`)
       .set('Authorization', `JWT ${accessToken}`);
 
-    const likes = postRespons.body.likes;
+    const likes = getPostResponse.body.likes;
 
-    const response = await request(app)
+    const likeResponse = await request(app)
       .post(`${baseUrl}/${testPost._id}/like`)
       .set('Authorization', `JWT ${accessToken}`);
 
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    const updatedPost = await request(app)
+    expect(likeResponse.statusCode).toBe(StatusCodes.OK);
+    const updatedPostAfterLikeResponse = await request(app)
       .get(`${baseUrl}/${testPost._id}`)
       .set('Authorization', `JWT ${accessToken}`);
 
-    expect(updatedPost.body.likes).toBe(likes + 1);
+    expect(updatedPostAfterLikeResponse.body.likes).toBe(likes + 1);
+
+    const updatesLikes = likes + 1;
+
+    const dislikeResponse = await request(app)
+      .post(`${baseUrl}/${testPost._id}/like`)
+      .set('Authorization', `JWT ${accessToken}`);
+
+    expect(dislikeResponse.statusCode).toBe(StatusCodes.OK);
+
+    const updatedPostAfterDisikeResponse = await request(app)
+      .get(`${baseUrl}/${testPost._id}`)
+      .set('Authorization', `JWT ${accessToken}`);
+
+    expect(updatedPostAfterDisikeResponse.body.likes).toBe(updatesLikes - 1);
   });
 
   test('Like a post that does not exist', async () => {

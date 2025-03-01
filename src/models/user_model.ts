@@ -36,11 +36,11 @@ const userSchema = new Schema({
     type: String
   },
   likedPosts: {
-    tyle: [String],
+    type: [String],
     default: []
   },
   activities: {
-    tyle: [String],
+    type: [String],
     default: []
   }
 });
