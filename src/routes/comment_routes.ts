@@ -232,4 +232,4 @@ CommentRouter.delete('/:id', commentController.delete.bind(commentController));
 
 CommentRouter.get('/:id', commentController.findById.bind(commentController));
 
-export { CommentRouter };
+export default CommentRouter ;
