@@ -1,9 +1,8 @@
 import { Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
 
 export const sendError = (
   response: Response,
-  statusCode: StatusCodes,
+  statusCode: number,
   logMessage?: string
 ) => {
   if (logMessage) {
