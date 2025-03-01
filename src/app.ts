@@ -9,6 +9,7 @@ import PostRouter from './routes/post_routes';
 import cors from 'cors';
 import FileRouter from './routes/file_routes';
 import CommentRouter from './routes/comment_routes';
+import ActivityRouter from './routes/activity_routes';
 
 verifyEnvVariables();
 
@@ -60,6 +61,7 @@ export const initApp = async () => {
   app.use('/posts', PostRouter);
   app.use('/files', FileRouter);
   app.use('/comments', CommentRouter);
+  app.use('/activities', ActivityRouter);
 
   app.use('/storage', express.static('storage'));
 
