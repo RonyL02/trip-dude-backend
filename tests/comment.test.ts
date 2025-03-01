@@ -9,7 +9,7 @@ import { createUser, loginUser } from './utils';
 
 const baseUrl = '/comments';
 
-type TestComment = Omit<IComment, 'senderId'> & { senderId?: string };
+type TestComment = Omit<IComment, 'userId'> & { userId?: string };
 
 let app: Express;
 const testCommentJson: TestComment[] = [];

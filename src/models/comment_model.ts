@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 export type IComment = {
-  senderId: string;
+  userId: string;
   postId: string;
   content: string;
   _id?: string;
@@ -10,7 +10,7 @@ export type IComment = {
 const Schema = mongoose.Schema;
 
 const commentSchema = new Schema<IComment>({
-  senderId: {
+  userId: {
     type: String,
     required: true
   },
