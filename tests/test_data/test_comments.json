@@ -1,0 +1,14 @@
+[
+    {
+        "postId": "63f51a2c1234a2b1c0e5a123",
+        "content": "This is a test comment for post 1"
+    },
+    {
+        "postId": "63f51a2c1234a2b1c0e5a456",
+        "content": "This is another test comment for post 2"
+    },
+    {
+        "postId": "63f51a2c1234a2b1c0e5a789",
+        "content": "A third comment for testing purposes"
+    }
+]

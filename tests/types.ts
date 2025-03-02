@@ -1,3 +1,4 @@
+import { IComment } from '../src/models/comment_model';
 import { IPost } from '../src/models/post_model';
 import { IUser } from '../src/models/user_model';
 
@@ -12,3 +13,4 @@ export type TestPost = Omit<IPost, 'userId' | '_id' | 'likes'> & {
   _id?: string;
   likes?: number;
 };
+export type TestComment = Omit<IComment, 'userId'> & { userId?: string };
