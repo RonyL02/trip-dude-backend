@@ -1,36 +1,10 @@
-import express from "express";
-import { UserController } from "../controllers/user_controller";
-import { authenticationMiddleware } from "../middlewares/authentication_middleware";
-import { RequestWithUser } from "../types"; 
+import { Router } from 'express';
+import { authenticationMiddleware } from '../middlewares/authentication_middleware';
+import UserController from '../controllers/user_controller';
 
-const userController = new UserController();
-const UserRouter = express.Router();
+const UserRouter = Router();
 
 UserRouter.use(authenticationMiddleware);
-
-/**
- * @swagger
- * /users/{id}:
- *   get:
- *     summary: Get user by ID
- *     tags:
- *       - Users
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The user ID
- *     responses:
- *       200:
- *         description: User details (without password)
- *       404:
- *         description: User not found
- *       500:
- *         description: Server error
- */
-UserRouter.get("/:id", userController.findById.bind(userController));
 
 /**
  * @swagger
@@ -54,10 +28,31 @@ UserRouter.get("/:id", userController.findById.bind(userController));
  *       500:
  *         description: Server error
  */
-UserRouter.get("/profile", (req: RequestWithUser, res: express.Response) => {
-    req.params.id = req.user!._id; 
-    userController.findById(req, res);
-});
+UserRouter.get('/profile', UserController.getProfile.bind(UserController));
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: User details (without password)
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+UserRouter.get('/:id', UserController.findById.bind(UserController));
 
 /**
  * @swagger
@@ -96,6 +91,6 @@ UserRouter.get("/profile", (req: RequestWithUser, res: express.Response) => {
  *       500:
  *         description: Server error
  */
-UserRouter.patch("/", userController.update.bind(userController));
+UserRouter.patch('/', UserController.update.bind(UserController));
 
 export default UserRouter;
