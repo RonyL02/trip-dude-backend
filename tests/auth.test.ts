@@ -4,6 +4,7 @@ import { initApp } from '../src/app';
 import mongoose from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
 import { UserModel } from '../src/models/user_model';
+import { extractFromCookie } from './utils';
 
 let app: Express;
 
@@ -11,9 +12,9 @@ const user = {
   username: 'aaa',
   password: 'sdffssdf',
   email: 'aaa@dfg.fgd',
-  refreshToken: undefined,
-  accessToken: undefined,
-  _id: undefined
+  refreshToken: '',
+  accessToken: '',
+  _id: ''
 };
 
 beforeAll(async () => {
@@ -28,12 +29,20 @@ afterAll(async () => {
 
 describe('Auth Tests', () => {
   test('Auth Registration', async () => {
-    const response = await request(app).post('/auth/register').send(user);
+    const response = await request(app).post('/auth/register').send({
+      username: user.username,
+      password: user.password,
+      email: user.email
+    });
     expect(response.statusCode).toBe(StatusCodes.CREATED);
   });
 
   test('Auth Registration fail', async () => {
-    const response = await request(app).post('/auth/register').send(user);
+    const response = await request(app).post('/auth/register').send({
+      username: user.username,
+      password: user.password,
+      email: user.email
+    });
     expect(response.statusCode).toBe(StatusCodes.CONFLICT);
   });
 
@@ -69,15 +78,12 @@ describe('Auth Tests', () => {
       password: user.password
     });
     expect(response.statusCode).toBe(StatusCodes.OK);
-    const accessToken = response.body.accessToken;
-    const refreshToken = response.body.refreshToken;
-    const userId = response.body.userId;
+    const accessToken = extractFromCookie(response, 'access_token');
+    const refreshToken = extractFromCookie(response, 'refresh_token');
     expect(accessToken).toBeDefined();
     expect(refreshToken).toBeDefined();
-    expect(userId).toBeDefined();
-    user.accessToken = accessToken;
-    user.refreshToken = refreshToken;
-    user._id = userId;
+    user.accessToken = accessToken!;
+    user.refreshToken = refreshToken!;
   });
 
   test('Make sure two access tokens are not the same', async () => {
@@ -85,22 +91,28 @@ describe('Auth Tests', () => {
       email: user.email,
       password: user.password
     });
-    expect(response.body.accessToken).not.toBe(user.accessToken);
+    expect(extractFromCookie(response, 'access_token')).not.toBe(
+      user.accessToken
+    );
   });
 
-  // test("Get protected API", async () => {
-  //   const unauthenticatedResponse = await request(app).post("/posts").send({
-  //     title: "My First post",
-  //     content: "This is my first post",
-  //   });
-  //   expect(unauthenticatedResponse.statusCode).not.toBe(StatusCodes.CREATED);
-  //   const authenticatedResponse = await request(app).post("/posts")
-  //     .set('Authorization', `JWT ${user.accessToken}`).send({
-  //       title: "My First post",
-  //       content: "This is my first post",
-  //     });
-  //   expect(authenticatedResponse.statusCode).toBe(StatusCodes.CREATED);
-  // });
+  test('Get protected API', async () => {
+    const unauthenticatedResponse = await request(app).post('/posts').send({
+      description: 'This is my first post',
+      activityId: 'aaaa',
+      imageUrl: 'dssdfsd'
+    });
+    expect(unauthenticatedResponse.statusCode).not.toBe(StatusCodes.CREATED);
+    const authenticatedResponse = await request(app)
+      .post('/posts')
+      .set('Authorization', `JWT ${user.accessToken}`)
+      .send({
+        description: 'This is my first post',
+        activityId: 'aaaa',
+        imageUrl: 'dssdfsd'
+      });
+    expect(authenticatedResponse.statusCode).toBe(StatusCodes.CREATED);
+  });
 
   test('Get protected API invalid token', async () => {
     const response = await request(app)
@@ -133,10 +145,13 @@ describe('Auth Tests', () => {
       .post('/auth/refreshToken')
       .set('Authorization', `jwt ${user.refreshToken}`);
     expect(response.statusCode).toBe(StatusCodes.OK);
-    expect(response.body.accessToken).toBeDefined();
-    expect(response.body.refreshToken).toBeDefined();
-    user.accessToken = response.body.accessToken;
-    user.refreshToken = response.body.refreshToken;
+    const accessToken = extractFromCookie(response, 'access_token');
+    const refreshToken = extractFromCookie(response, 'refresh_token');
+
+    expect(accessToken).toBeDefined();
+    expect(refreshToken).toBeDefined();
+    user.accessToken = accessToken;
+    user.refreshToken = refreshToken;
   });
 
   test('Refresh Token invalid on logout', async () => {
@@ -153,21 +168,23 @@ describe('Auth Tests', () => {
   });
 
   test('Logout - invalidate refresh token', async () => {
+    console.log('pppppp', user.refreshToken);
+
     const response = await request(app)
       .post('/auth/logout')
-      .set('Authorization', `JWT ${user.refreshToken}`);
+      .set('Authorization', `jwt ${user.refreshToken}`);
 
     expect(response.statusCode).toBe(StatusCodes.OK);
 
     const responseForRefreshAfterLogout = await request(app)
       .post('/auth/refreshToken')
-      .set('Authorization', `JWT ${user.refreshToken}`);
+      .set('Authorization', `jwt ${user.refreshToken}`);
 
     expect(responseForRefreshAfterLogout.statusCode).not.toBe(StatusCodes.OK);
 
     const responseForLogoutAfterLogout = await request(app)
       .post('/auth/logout')
-      .set('Authorization', `JWT ${user.refreshToken}`);
+      .set('Authorization', `jwt ${user.refreshToken}`);
 
     expect(responseForLogoutAfterLogout.statusCode).not.toBe(StatusCodes.OK);
 
@@ -184,17 +201,22 @@ describe('Auth Tests', () => {
       password: user.password
     });
     expect(loginResponse.statusCode).toBe(StatusCodes.OK);
-    expect(loginResponse.body.accessToken).toBeDefined();
-    expect(loginResponse.body.refreshToken).toBeDefined();
-    user.accessToken = loginResponse.body.accessToken;
-    user.refreshToken = loginResponse.body.refreshToken;
+    const accessToken = extractFromCookie(loginResponse, 'access_token');
+    const refreshToken = extractFromCookie(loginResponse, 'refresh_token');
+    expect(accessToken).toBeDefined();
+    expect(refreshToken).toBeDefined();
+    user.accessToken = accessToken;
+    user.refreshToken = refreshToken;
 
     const refreshWithValidTokenResponse = await request(app)
       .post('/auth/refreshToken')
       .set('Authorization', `JWT ${user.refreshToken}`);
 
     expect(refreshWithValidTokenResponse.statusCode).toBe(StatusCodes.OK);
-    const newRefreshToken = refreshWithValidTokenResponse.body.refreshToken;
+    const newRefreshToken = extractFromCookie(
+      refreshWithValidTokenResponse,
+      'refresh_token'
+    );
 
     const refreshWithInvalidatedTokenResponse = await request(app)
       .post('/auth/refreshToken')
@@ -214,40 +236,50 @@ describe('Auth Tests', () => {
   });
 
   jest.setTimeout(30000);
-  // test("timeout on refresh access token", async () => {
-  //   const loginResponse = await request(app).post("/auth/login").send({
-  //     email: user.email,
-  //     password: user.password
-  //   });
-  //   expect(loginResponse.statusCode).toBe(StatusCodes.OK);
-  //   expect(loginResponse.body.accessToken).toBeDefined();
-  //   expect(loginResponse.body.refreshToken).toBeDefined();
-  //   user.accessToken = loginResponse.body.accessToken;
-  //   user.refreshToken = loginResponse.body.refreshToken;
+  test('timeout on refresh access token', async () => {
+    const loginResponse = await request(app).post('/auth/login').send({
+      email: user.email,
+      password: user.password
+    });
+    expect(loginResponse.statusCode).toBe(StatusCodes.OK);
+    const accessToken = extractFromCookie(loginResponse, 'access_token');
+    const refreshToken = extractFromCookie(loginResponse, 'refresh_token');
+    expect(accessToken).toBeDefined();
+    expect(refreshToken).toBeDefined();
+    user.accessToken = accessToken;
+    user.refreshToken = refreshToken;
+    await new Promise((resolve) => setTimeout(resolve, 11000));
 
-  //   await new Promise(resolve => setTimeout(resolve, 11000));
+    const createPostResponse = await request(app)
+      .post('/posts')
+      .set({
+        authorization: `jwt ${user.accessToken}`
+      })
+      .send({
+        description: 'This is my first post',
+        activityId: 'aaaa',
+        imageUrl: 'dssdfsd'
+      });
+    expect(createPostResponse.statusCode).not.toBe(StatusCodes.CREATED);
 
-  //   const createPostResponse = await request(app).post("/posts").set({
-  //     authorization: `jwt ${user.accessToken}`
-  //   }).send({
-  //     title: "My First post",
-  //     content: "This is my first post",
-  //   });
-  //   expect(createPostResponse.statusCode).not.toBe(StatusCodes.CREATED);
+    const refreshResponse = await request(app)
+      .post('/auth/refreshToken')
+      .set('Authorization', `JWT ${user.refreshToken}`);
 
-  //   const refreshResponse = await request(app).post("/auth/refreshToken")
-  //     .set('Authorization', `JWT ${user.refreshToken}`);
+    expect(refreshResponse.statusCode).toBe(StatusCodes.OK);
+    user.accessToken = extractFromCookie(refreshResponse, 'access_token');
+    user.refreshToken = extractFromCookie(refreshResponse, 'refresh_token');
 
-  //   expect(refreshResponse.statusCode).toBe(StatusCodes.OK);
-  //   user.accessToken = refreshResponse.body.accessToken;
-  //   user.refreshToken = refreshResponse.body.refreshToken;
-
-  //   const createPostAfterRefreshResponse = await request(app).post("/posts").set({
-  //     authorization: `jwt ${user.accessToken}`
-  //   }).send({
-  //     title: "My First post",
-  //     content: "This is my first post",
-  //   });
-  //   expect(createPostAfterRefreshResponse.statusCode).toBe(StatusCodes.CREATED);
-  // });
+    const createPostAfterRefreshResponse = await request(app)
+      .post('/posts')
+      .set({
+        authorization: `jwt ${user.accessToken}`
+      })
+      .send({
+        description: 'This is my first post',
+        activityId: 'aaaa',
+        imageUrl: 'dssdfsd'
+      });
+    expect(createPostAfterRefreshResponse.statusCode).toBe(StatusCodes.CREATED);
+  });
 });
