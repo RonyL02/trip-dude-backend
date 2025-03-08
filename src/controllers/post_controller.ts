@@ -13,7 +13,9 @@ export class PostController extends BaseController<IPost> {
   async create(request: RequestWithUser, response: Response) {
     const newPost = {
       ...request.body,
-      userId: request.user!._id
+      userId: request.user!._id,
+      //TODO: change once we have actual activities
+      activityId: 'placeholder'
     };
 
     request.body = newPost;

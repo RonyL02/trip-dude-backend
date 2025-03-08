@@ -10,7 +10,6 @@ import cors from 'cors';
 import FileRouter from './routes/file_routes';
 import UserRouter from './routes/user_routes';
 import CommentRouter from './routes/comment_routes';
-
 verifyEnvVariables();
 
 const initDB = async () => {
@@ -43,7 +42,12 @@ export const initApp = async () => {
   await initDB();
 
   const app = express();
-  app.use(cors());
+  app.use(
+    cors({
+      credentials: true,
+      origin: Env.DOMAIN_FRONT
+    })
+  );
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
