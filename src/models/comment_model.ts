@@ -4,6 +4,8 @@ export type IComment = {
   userId: string;
   postId: string;
   content: string;
+  username: string;
+  imageUrl: string;
   _id?: string;
 };
 
@@ -21,6 +23,14 @@ const commentSchema = new Schema<IComment>({
   content: {
     type: String,
     required: true
+  },
+  username: {
+    type: String,
+    required: true
+  },
+  imageUrl: {
+    type: String,
+    required: false
   }
 });
 

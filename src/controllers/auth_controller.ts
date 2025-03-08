@@ -150,7 +150,8 @@ class AuthController extends BaseController<IUser> {
         user = await this.model.create({
           email: googlePayload.email,
           username: googlePayload.email.split('@')[0],
-          password: randomBytes(32).toString('hex')
+          password: randomBytes(32).toString('hex'),
+          imageUrl: googlePayload.picture
         });
       }
 
