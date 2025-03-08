@@ -8,6 +8,7 @@ import AuthRouter from './routes/auth_routes';
 import PostRouter from './routes/post_routes';
 import cors from 'cors';
 import FileRouter from './routes/file_routes';
+import UserRouter from './routes/user_routes';
 import CommentRouter from './routes/comment_routes';
 import ActivityRouter from './routes/activity_routes';
 
@@ -43,7 +44,12 @@ export const initApp = async () => {
   await initDB();
 
   const app = express();
-  app.use(cors());
+  app.use(
+    cors({
+      credentials: true,
+      origin: Env.DOMAIN_FRONT
+    })
+  );
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -60,6 +66,7 @@ export const initApp = async () => {
   app.use('/auth', AuthRouter);
   app.use('/posts', PostRouter);
   app.use('/files', FileRouter);
+  app.use('/users', UserRouter);
   app.use('/comments', CommentRouter);
   app.use('/activities', ActivityRouter);
 

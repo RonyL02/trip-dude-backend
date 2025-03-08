@@ -108,7 +108,19 @@ class AuthController extends BaseController<IUser> {
         tokens: updatedTokens
       });
 
-      response.send({ accessToken, refreshToken, userId: user._id });
+      this.addCookie(
+        response,
+        'access_token',
+        accessToken,
+        Env.JWT_TOKEN_EXPIRATION
+      );
+      this.addCookie(
+        response,
+        'refresh_token',
+        refreshToken,
+        Env.REFRESH_TOKEN_EXPIRATION
+      );
+      response.send({ username: user.username });
     } catch (error) {
       return sendError(response, StatusCodes.INTERNAL_SERVER_ERROR, `${error}`);
     }
@@ -154,7 +166,19 @@ class AuthController extends BaseController<IUser> {
         tokens: updatedTokens
       });
 
-      response.send({ accessToken, refreshToken, userId: user._id });
+      this.addCookie(
+        response,
+        'access_token',
+        accessToken,
+        Env.JWT_TOKEN_EXPIRATION
+      );
+      this.addCookie(
+        response,
+        'refresh_token',
+        refreshToken,
+        Env.REFRESH_TOKEN_EXPIRATION
+      );
+      response.send({ username: user.username });
     } catch (error) {
       return sendError(
         response,
@@ -253,7 +277,19 @@ class AuthController extends BaseController<IUser> {
         tokens: [...tokensWithoutCurrentRefreshToken, newRefreshToken]
       });
 
-      response.send({ accessToken, refreshToken: newRefreshToken });
+      this.addCookie(
+        response,
+        'access_token',
+        accessToken,
+        Env.JWT_TOKEN_EXPIRATION
+      );
+      this.addCookie(
+        response,
+        'refresh_token',
+        newRefreshToken,
+        Env.REFRESH_TOKEN_EXPIRATION
+      );
+      response.send();
     } catch (error) {
       return sendError(
         response,
@@ -291,6 +327,40 @@ class AuthController extends BaseController<IUser> {
     const salt = await genSalt(10);
     const hashedPassword = await hash(password, salt);
     return hashedPassword;
+  }
+
+  private addCookie(
+    response: Response,
+    name: string,
+    value: string,
+    expiration: string
+  ) {
+    response.cookie(name, value, {
+      httpOnly: false,
+      sameSite: 'lax',
+      expires: new Date(this.convertToDate(expiration).getTime() + Date.now())
+    });
+  }
+
+  private convertToDate(timeStr: string): Date {
+    const match = timeStr.match(/^(\d+)([hdms])$/);
+    if (!match) throw new Error('Invalid format');
+
+    const [, value, unit] = match;
+    const time = parseInt(value, 10);
+
+    switch (unit) {
+      case 'd':
+        return new Date(time * 60 * 60 * 1000 * 24);
+      case 'h':
+        return new Date(time * 60 * 60 * 1000);
+      case 'm':
+        return new Date(time * 60 * 1000);
+      case 's':
+        return new Date(time * 1000);
+      default:
+        throw new Error('Invalid unit');
+    }
   }
 }
 
