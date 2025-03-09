@@ -62,12 +62,19 @@ class ActivityController extends BaseController<IActivity> {
 
   async create(request: RequestWithUser, response: Response): Promise<void> {
     const savedActivity: Activity = request.body;
-
-    await UserModel.findByIdAndUpdate(request.user!._id, {
-      $push: { activities: savedActivity.id }
-    });
-
-    super.create(request, response);
+    try {
+      const { _id: newId } = await this.model.create(savedActivity);
+      await UserModel.findByIdAndUpdate(request.user!._id, {
+        $push: { activities: newId }
+      });
+      response.status(StatusCodes.CREATED).send({ newId });
+    } catch (error) {
+      sendError(
+        response,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        JSON.stringify(error)
+      );
+    }
   }
 }
 
