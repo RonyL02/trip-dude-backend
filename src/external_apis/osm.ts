@@ -6,6 +6,7 @@ type OsmResult = {
   longitude: number;
   name: string;
   country: string;
+  city: string;
   displayName: string;
   type: string;
   placeId: number;
@@ -26,7 +27,8 @@ export const getPlaces = async (locationQuery: string) => {
           country: place.address.country,
           displayName: place.display_name,
           type: place.type,
-          placeId: place.place_id
+          placeId: place.place_id,
+          city: place.address.city
         }) as OsmResult
     ) as OsmResult[];
   } catch (error) {
