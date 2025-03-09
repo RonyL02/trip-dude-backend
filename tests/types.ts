@@ -8,6 +8,7 @@ export type TestUser = Omit<
 > & {
   tokens?: string[];
   _id?: string;
+  activities?: string;
 };
 export type TestPost = Omit<IPost, 'userId' | '_id' | 'likes'> & {
   _id?: string;

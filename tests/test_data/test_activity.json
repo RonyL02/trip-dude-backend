@@ -1,0 +1,20 @@
+{
+    "id": "string",
+    "name": "string",
+    "shortDescription": "string",
+    "description": "string",
+    "geoCode": {
+        "latitude": 0,
+        "longitude": 0
+    },
+    "rating": "string",
+    "price": {
+        "amount": "string",
+        "currencyCode": "string"
+    },
+    "pictures": [
+        "string"
+    ],
+    "bookingLink": "string",
+    "minimumDuration": "string"
+}
