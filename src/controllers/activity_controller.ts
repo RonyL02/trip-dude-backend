@@ -76,6 +76,23 @@ class ActivityController extends BaseController<IActivity> {
       );
     }
   }
+
+  async find(request: RequestWithUser, response: Response) {
+    try {
+      const user = await UserModel.findById(request.user!._id);
+
+      const activities = await this.model.find({
+        _id: { $in: user?.activities ?? [] }
+      });
+      response.send(activities);
+    } catch (error) {
+      sendError(
+        response,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        `Failed to get saved activities: ${JSON.stringify(error)}`
+      );
+    }
+  }
 }
 
 export default new ActivityController();

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 export type IActivity = {
+  _id?: string;
   id?: string;
   name?: string;
   shortDescription?: string;
