@@ -10,6 +10,8 @@ import cors from 'cors';
 import FileRouter from './routes/file_routes';
 import UserRouter from './routes/user_routes';
 import CommentRouter from './routes/comment_routes';
+import ActivityRouter from './routes/activity_routes';
+
 verifyEnvVariables();
 
 const initDB = async () => {
@@ -66,6 +68,7 @@ export const initApp = async () => {
   app.use('/files', FileRouter);
   app.use('/users', UserRouter);
   app.use('/comments', CommentRouter);
+  app.use('/activities', ActivityRouter);
 
   app.use('/storage', express.static('storage'));
 

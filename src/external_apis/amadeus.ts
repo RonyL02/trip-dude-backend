@@ -20,10 +20,12 @@ export type Activity = {
   minimumDuration?: string;
 };
 
-const amadeusClient = new Amadeus({
-  clientId: Env.AMADEUS_API_KEY,
-  clientSecret: Env.AMADEUS_SECRET
-});
+const amadeusClient = Env.AMADEUS_API_KEY
+  ? new Amadeus({
+      clientId: Env.AMADEUS_API_KEY,
+      clientSecret: Env.AMADEUS_SECRET
+    })
+  : undefined;
 
 export const getActivities = async (
   latitude: number,
