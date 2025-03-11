@@ -7,7 +7,7 @@ import { StatusCodes } from 'http-status-codes';
 import { UserModel } from '../src/models/user_model';
 import { createUser, loginUser } from './utils';
 import testCommentsJson from './test_data/test_comments.json';
-import { TestComment, TestUser } from './types';
+import { TestComment, TestPost, TestUser } from './types';
 const baseUrl = '/comments';
 
 let app: Express;
@@ -19,6 +19,12 @@ const testUser: TestUser = {
   username: 'testuser'
 };
 
+const testPost: TestPost = {
+  activityId: '23432433',
+  description: 'decription',
+  imageUrl: 'sdfsd/sdffds/sdfsfd.png'
+};
+
 let accessToken: string | undefined;
 
 beforeAll(async () => {
@@ -28,6 +34,22 @@ beforeAll(async () => {
   await UserModel.deleteMany();
   const userId = await createUser(app, testUser);
   testUser._id = userId;
+  const responseBody = await loginUser(app, testUser.email, testUser.password);
+  accessToken = responseBody.accessToken;
+  const response = await request(app)
+    .post('/posts')
+    .set('Authorization', `JWT ${accessToken}`)
+    .send({
+      activityId: '23432433',
+      description: 'decription',
+      imageUrl: 'sdfsd/sdffds/sdfsfd.png'
+    });
+
+  testPost._id = response.body.newId;
+
+  testComments.forEach((comment) => {
+    comment.postId = testPost._id!;
+  });
 });
 
 beforeEach(async () => {
@@ -93,13 +115,13 @@ describe('Comments API Tests', () => {
 
   test('Get comments by post ID', async () => {
     const postId = testComments[0].postId;
-    const response = await request(app)
+    const getCommentResponse = await request(app)
       .get(`${baseUrl}?postId=${postId}`)
       .set('Authorization', `JWT ${accessToken}`);
 
-    expect(response.statusCode).toBe(StatusCodes.OK);
-    expect(response.body.length).toBeGreaterThan(0);
-    expect(response.body[0].postId).toBe(postId);
+    expect(getCommentResponse.statusCode).toBe(StatusCodes.OK);
+    expect(getCommentResponse.body.length).toBeGreaterThan(0);
+    expect(getCommentResponse.body[0].postId).toBe(postId);
   });
 
   test('Update a comment', async () => {

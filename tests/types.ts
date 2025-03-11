@@ -14,4 +14,8 @@ export type TestPost = Omit<IPost, 'userId' | '_id' | 'likes'> & {
   _id?: string;
   likes?: number;
 };
-export type TestComment = Omit<IComment, 'userId'> & { userId?: string };
+export type TestComment = Omit<IComment, 'userId' | 'imageUrl' | 'username'> & {
+  userId?: string;
+  imageUrl?: string;
+  username?: string;
+};
