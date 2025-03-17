@@ -113,7 +113,8 @@ class ActivityController extends BaseController<IActivity> {
       const activities = await this.model.find({
         _id: { $in: user?.activities ?? [] }
       });
-      response.send(activities);
+
+      response.send(activities ?? []);
     } catch (error) {
       sendError(
         response,

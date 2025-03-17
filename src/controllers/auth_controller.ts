@@ -10,6 +10,8 @@ import { IUser, UserModel } from '../models/user_model';
 import { Env } from '../env';
 import GoogleAuthClient from '../external_apis/googleAuth';
 import { randomBytes } from 'crypto';
+import axios from 'axios';
+import fs from 'node:fs/promises';
 
 class AuthController extends BaseController<IUser> {
   constructor() {
@@ -147,11 +149,23 @@ class AuthController extends BaseController<IUser> {
       let user = await this.model.findOne({ email: googlePayload.email });
 
       if (!user) {
+        let imageUrl: string | undefined;
+        if (googlePayload.picture) {
+          const picture = (
+            await axios.get(googlePayload.picture, {
+              responseType: 'arraybuffer'
+            })
+          ).data;
+
+          const filePath = `storage/${Date.now()}.png`;
+          await fs.writeFile(filePath, picture);
+          imageUrl = `${Env.DOMAIN_BASE}/${filePath}`;
+        }
         user = await this.model.create({
           email: googlePayload.email,
           username: googlePayload.email.split('@')[0],
           password: randomBytes(32).toString('hex'),
-          imageUrl: googlePayload.picture
+          imageUrl
         });
       }
 
