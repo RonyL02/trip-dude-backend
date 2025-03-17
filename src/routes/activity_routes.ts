@@ -8,6 +8,29 @@ ActivityRouter.use(authenticationMiddleware);
 
 /**
  * @swagger
+ * /activities/location:
+ *   get:
+ *     summary: Get place names by query
+ *     tags:
+ *       - Activities
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The name of the place
+ *     responses:
+ *       200:
+ *         description: A list of matching place names
+ */
+ActivityRouter.get(
+  '/location',
+  ActivityController.getPlaceNames.bind(ActivityController)
+);
+
+/**
+ * @swagger
  * /activities:
  *   get:
  *     summary: Get matching activities based on location and description
@@ -73,29 +96,6 @@ ActivityRouter.get(
 
 /**
  * @swagger
- * /activities/location:
- *   get:
- *     summary: Get place names by query
- *     tags:
- *       - Activities
- *     parameters:
- *       - in: query
- *         name: name
- *         schema:
- *           type: string
- *         required: true
- *         description: The name of the place
- *     responses:
- *       200:
- *         description: A list of matching place names
- */
-ActivityRouter.get(
-  '/location',
-  ActivityController.getPlaceNames.bind(ActivityController)
-);
-
-/**
- * @swagger
  * /activities:
  *   post:
  *     summary: Create a new activity
@@ -145,5 +145,39 @@ ActivityRouter.get(
  *         description: Activity created successfully
  */
 ActivityRouter.post('/', ActivityController.create.bind(ActivityController));
+
+/**
+ * @swagger
+ * /activities/{id}:
+ *   delete:
+ *     summary: Delete a Activity by ID
+ *     description: Delete a single Activity by its ID
+ *     tags:
+ *       - Activities
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user token
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the Activity
+ *     responses:
+ *       200:
+ *         description: Activity deleted successfully
+ *       404:
+ *         description: Activity not found
+ *       500:
+ *         description: Server error
+ */
+ActivityRouter.delete(
+  '/:id',
+  ActivityController.delete.bind(ActivityController)
+);
 
 export default ActivityRouter;

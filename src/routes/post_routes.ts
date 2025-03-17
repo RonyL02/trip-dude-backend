@@ -9,6 +9,36 @@ PostRouter.use(authenticationMiddleware);
 
 /**
  * @swagger
+ * /posts/{id}/like:
+ *   post:
+ *     summary: Like a post
+ *     tags:
+ *       - Posts
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user token
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The post ID
+ *     responses:
+ *       200:
+ *         description: Post liked successfully
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Server error
+ */
+PostRouter.post('/:id/like', postController.like.bind(postController));
+
+/**
+ * @swagger
  * /posts:
  *   post:
  *     summary: Create a new post
@@ -46,36 +76,6 @@ PostRouter.use(authenticationMiddleware);
  *         description: Server error
  */
 PostRouter.post('/', postController.create.bind(postController));
-
-/**
- * @swagger
- * /posts/{id}/like:
- *   post:
- *     summary: Like a post
- *     tags:
- *       - Posts
- *     parameters:
- *       - in: header
- *         name: Authorization
- *         schema:
- *           type: string
- *         required: true
- *         description: The user token
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The post ID
- *     responses:
- *       200:
- *         description: Post liked successfully
- *       404:
- *         description: Post not found
- *       500:
- *         description: Server error
- */
-PostRouter.post('/:id/like', postController.like.bind(postController));
 
 /**
  * @swagger

@@ -18,16 +18,36 @@ class ActivityController extends BaseController<IActivity> {
 
     try {
       const [{ latitude, longitude }] = await getPlaces(location as string);
+      console.time('fetch activities');
       const activities = await getActivities(latitude, longitude);
+      console.timeEnd('fetch activities');
 
+      console.time('filter');
       const aiFilter = await getGeminiResponse(`
         This is an api for activities around the world.
         Here is a description of a desired activity: ${description}.
         Please return a list of ids of all activities that would match the description.
         The response must only contain the ids separated by a comma.
         Do not end the message with an empty new line.
-        ${JSON.stringify(activities)}
-        `);
+        ${activities.map(
+          ({
+            description,
+            minimumDuration,
+            price,
+            rating,
+            shortDescription,
+            id
+          }) =>
+            ` id:${id},
+          description:${description},
+          minimumDuration:${minimumDuration},
+          price:${price?.amount} ${price?.currencyCode},
+          rating:${rating},
+          shortDescription:${shortDescription}`
+        )}
+          ----------------------------------------
+          `);
+      console.timeEnd('filter');
 
       const filteredIds = aiFilter.split('\n').join().split(',');
       const filteredActivities = activities.filter(({ id }) =>
@@ -48,7 +68,7 @@ class ActivityController extends BaseController<IActivity> {
     const { name } = request.query;
     try {
       const placeNames = ((await getPlaces(name!.toString())) ?? []).map(
-        ({ city, country, name }) => `${country}, ${city ?? name}`
+        ({ city, country }) => `${country}${city ? `, ${city}` : ''}`
       );
       response.status(StatusCodes.OK).send(Array.from(new Set(placeNames)));
     } catch (error) {
@@ -63,7 +83,16 @@ class ActivityController extends BaseController<IActivity> {
   async create(request: RequestWithUser, response: Response): Promise<void> {
     const savedActivity: Activity = request.body;
     try {
-      const { _id: newId } = await this.model.create(savedActivity);
+      const existingActivity = await this.model.findOne({
+        id: savedActivity.id
+      });
+      let newId: string;
+      if (!existingActivity) {
+        newId = (await this.model.create(savedActivity))._id;
+      } else {
+        newId = existingActivity._id;
+      }
+
       await UserModel.findByIdAndUpdate(request.user!._id, {
         $push: { activities: newId }
       });
@@ -84,7 +113,8 @@ class ActivityController extends BaseController<IActivity> {
       const activities = await this.model.find({
         _id: { $in: user?.activities ?? [] }
       });
-      response.send(activities);
+
+      response.send(activities ?? []);
     } catch (error) {
       sendError(
         response,
@@ -92,6 +122,13 @@ class ActivityController extends BaseController<IActivity> {
         `Failed to get saved activities: ${JSON.stringify(error)}`
       );
     }
+  }
+
+  async delete(request: RequestWithUser, response: Response) {
+    await UserModel.findByIdAndUpdate(request.user!._id, {
+      $pull: { activities: request.params.id }
+    });
+    super.delete(request, response);
   }
 }
 

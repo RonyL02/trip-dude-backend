@@ -75,7 +75,7 @@ describe('Activities API Tests', () => {
     expect(activities[0]._id).toBe(testUser.activities?.[0]);
   });
 
-  test('Get comment by ID', async () => {
+  test('Get activity by ID', async () => {
     const response = await request(app)
       .get(`${baseUrl}/${testActivity._id}`)
       .set('Authorization', `JWT ${accessToken}`);
@@ -84,7 +84,7 @@ describe('Activities API Tests', () => {
     expect(response.body.id).toBe(testActivity.id);
   });
 
-  test('Get comment by non existent ID', async () => {
+  test('Get activity by non existent ID', async () => {
     const nonExistentId = '673924d57453a2741caf84e1';
     const response = await request(app)
       .put(`${baseUrl}/${nonExistentId}`)
