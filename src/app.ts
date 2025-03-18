@@ -62,6 +62,8 @@ export const initApp = async () => {
   app.get('/health', (_request: Request, response: Response) => {
     response.send('trip-dude backend is up and running!');
   });
+  app.use(express.static('front'));
+  app.use('/storage', express.static('storage'));
 
   app.use('/auth', AuthRouter);
   app.use('/posts', PostRouter);
@@ -69,8 +71,6 @@ export const initApp = async () => {
   app.use('/users', UserRouter);
   app.use('/comments', CommentRouter);
   app.use('/activities', ActivityRouter);
-
-  app.use('/storage', express.static('storage'));
 
   return app;
 };
