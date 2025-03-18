@@ -7,6 +7,7 @@
     "test": "copy .\\env\\.test.env .env && jest --detectOpenHandles --forceExit --runInBand",
     "start": "tsc && copy .\\env\\.dev.env .env && node ./build/main.js",
     "dev": "copy .\\env\\.dev.env .env && nodemon ./src/main.ts",
+    "prod": "tsc && cp ./env/.prod.env .env && pm2 restart ./ecosystem.config.js --env production",
     "lint": "eslint",
     "format": "eslint --fix",
     "prepare": "husky install"
