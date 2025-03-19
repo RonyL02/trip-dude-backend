@@ -11,6 +11,7 @@ import FileRouter from './routes/file_routes';
 import UserRouter from './routes/user_routes';
 import CommentRouter from './routes/comment_routes';
 import ActivityRouter from './routes/activity_routes';
+import path from 'node:path';
 
 verifyEnvVariables();
 
@@ -62,7 +63,7 @@ export const initApp = async () => {
   app.get('/health', (_request: Request, response: Response) => {
     response.send('trip-dude backend is up and running!');
   });
-  app.use(express.static('front'));
+  // app.use(express.static('front'));
   app.use('/storage', express.static('storage'));
 
   app.use('/auth', AuthRouter);
@@ -71,6 +72,10 @@ export const initApp = async () => {
   app.use('/users', UserRouter);
   app.use('/comments', CommentRouter);
   app.use('/activities', ActivityRouter);
+
+  app.get('*', (_, res) => {
+    res.sendFile(path.join(__dirname, 'front', 'index.html'));
+  });
 
   return app;
 };
