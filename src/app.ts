@@ -24,7 +24,7 @@ const initDB = async () => {
   }
 };
 
-export const initSwagger = (app: Express) => {
+export const initSwagger = (app?: Express) => {
   const options = {
     definition: {
       openapi: '3.0.0',
@@ -37,8 +37,15 @@ export const initSwagger = (app: Express) => {
     apis: ['./src/routes/*.ts']
   };
   const specs = swaggerJSDoc(options);
+  let swaggerApp: Express | undefined;
+  if (Env.NODE_ENV === 'production') {
+    swaggerApp = express();
+    swaggerApp.use('/api-docs', swaggerUI.serve, swaggerUI.setup(specs));
+  } else {
+    app?.use('/api-docs', swaggerUI.serve, swaggerUI.setup(specs));
+  }
 
-  app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(specs));
+  return swaggerApp;
 };
 
 export const initApp = async () => {
@@ -73,9 +80,13 @@ export const initApp = async () => {
   app.use('/comments', CommentRouter);
   app.use('/activities', ActivityRouter);
 
-  app.get('*', (_, res) => {
-    res.sendFile(path.join(__dirname, 'front', 'index.html'));
-  });
+  if (Env.NODE_ENV === 'production') {
+    const buildPath = path.normalize(path.join(__dirname, '../front'));
+    app.use(express.static(buildPath));
 
+    app.get('(/*)?', async (_req, res) => {
+      res.sendFile(path.join(buildPath, 'index.html'));
+    });
+  }
   return app;
 };
