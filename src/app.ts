@@ -2,7 +2,7 @@ import express, { Request, Response, Express } from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import { Env, verifyEnvVariables } from './env';
-import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerJSDoc, { Options } from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
 import AuthRouter from './routes/auth_routes';
 import PostRouter from './routes/post_routes';
@@ -25,14 +25,19 @@ const initDB = async () => {
 };
 
 export const initSwagger = (app?: Express) => {
-  const options = {
+  const options: Options = {
     definition: {
       openapi: '3.0.0',
       info: {
         title: 'Trip Dude REST API',
         version: '1.0.0',
         description: 'REST server for the Trip Dude Application'
-      }
+      },
+      servers: [
+        { url: `http://localhost:${Env.PORT.toString()}` },
+        { url: 'https://10.10.246.100' },
+        { url: 'https://node100.cs.colman.ac.il' }
+      ]
     },
     apis: ['./src/routes/*.ts']
   };
@@ -70,7 +75,7 @@ export const initApp = async () => {
   app.get('/health', (_request: Request, response: Response) => {
     response.send('trip-dude backend is up and running!');
   });
-  // app.use(express.static('front'));
+
   app.use('/storage', express.static('storage'));
 
   app.use('/auth', AuthRouter);
