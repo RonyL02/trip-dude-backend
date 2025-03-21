@@ -15,6 +15,8 @@ const start = async () => {
       console.log(`trip-dude backend is running on port ${port} 🖼️`);
     });
   } else {
+    const swaggerApp = initSwagger()!;
+    swaggerApp.listen(80);
     const httpsConfig = {
       key: fs.readFileSync('../client-key.pem'),
       cert: fs.readFileSync('../client-cert.pem')
