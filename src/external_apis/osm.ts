@@ -10,12 +10,23 @@ type OsmResult = {
   displayName: string;
   type: string;
   placeId: number;
+  boundingBox: number[];
+  linkedPlace?: string;
 };
 
 export const getPlaces = async (locationQuery: string) => {
   try {
     const response = await axios.get(Env.OSM_URL, {
-      params: { q: locationQuery, format: 'json', addressdetails: 1, limit: 20 }
+      params: {
+        q: locationQuery,
+        format: 'json',
+        addressdetails: 1,
+        limit: 5,
+        class: 'boundary',
+        type: 'administrative',
+        'accept-language': 'en',
+        extratags: 1
+      }
     });
 
     return response.data.map(
@@ -28,7 +39,9 @@ export const getPlaces = async (locationQuery: string) => {
           displayName: place.display_name,
           type: place.type,
           placeId: place.place_id,
-          city: place.address.city
+          city: place.address.city,
+          boundingBox: place.boundingbox.map(Number),
+          linkedPlace: place.extratags?.linked_place ?? ''
         }) as OsmResult
     ) as OsmResult[];
   } catch (error) {

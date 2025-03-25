@@ -19,6 +19,7 @@
     "amadeus": "^11.0.0",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
+    "bottleneck": "^2.19.5",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
