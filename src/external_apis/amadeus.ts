@@ -23,7 +23,8 @@ export type Activity = {
 const amadeusClient = Env.AMADEUS_API_KEY
   ? new Amadeus({
       clientId: Env.AMADEUS_API_KEY,
-      clientSecret: Env.AMADEUS_SECRET
+      clientSecret: Env.AMADEUS_SECRET,
+      ...(Env.NODE_ENV === 'production' ? { hostname: 'production' } : {})
     })
   : undefined;
 
@@ -36,6 +37,17 @@ export const getActivities = async (
     latitude,
     longitude,
     radius
+  });
+
+  return (response.data as Activity[]) ?? [];
+};
+
+export const getActivitiesByBox = async (boundingBox: number[]) => {
+  const response = await amadeusClient.shopping.activities.bySquare.get({
+    south: boundingBox[0],
+    north: boundingBox[1],
+    west: boundingBox[2],
+    east: boundingBox[3]
   });
 
   return (response.data as Activity[]) ?? [];

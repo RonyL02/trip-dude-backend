@@ -8,6 +8,8 @@ import { BaseController } from './base_controller';
 import { ActivityModel, IActivity } from '../models/activity_model';
 import { RequestWithUser } from '../types';
 import { UserModel } from '../models/user_model';
+import { splitIntoBatches } from '../activityUtils';
+import Bottleneck from 'bottleneck';
 
 class ActivityController extends BaseController<IActivity> {
   constructor() {
@@ -15,46 +17,69 @@ class ActivityController extends BaseController<IActivity> {
   }
   async getMatchingActivities(request: Request, response: Response) {
     const { location, description } = request.query;
-
+    let activities: Activity[] = [];
     try {
       const [{ latitude, longitude }] = await getPlaces(location as string);
       console.time('fetch activities');
-      const activities = await getActivities(latitude, longitude);
+      const limiter = new Bottleneck({
+        minTime: 100
+      });
+
+      const limitedGetActivities = limiter.wrap(getActivities);
+      const limitedGetGeminiResponse = limiter.wrap(getGeminiResponse);
+
       console.timeEnd('fetch activities');
+      const promises: Promise<Activity[]>[] = [];
+      promises.push(limitedGetActivities(latitude, longitude));
+      activities = (await Promise.allSettled(promises))
+        .filter((p) => p.status === 'fulfilled')
+        .map(({ value }) => value)
+        .flat();
+      console.log(activities.length);
+      const ratedActivities = activities.slice(0, 200);
+      const batches = splitIntoBatches(ratedActivities, 50);
+      console.log('batches length', batches.length);
 
       console.time('filter');
-      const aiFilter = await getGeminiResponse(`
-        This is an api for activities around the world.
-        Here is a description of a desired activity: ${description}.
-        Please return a list of ids of all activities that would match the description.
-        The response must only contain the ids separated by a comma.
-        Do not end the message with an empty new line.
-        ${activities.map(
-          ({
+      const results = await Promise.allSettled(
+        batches.map(async (batch) => {
+          const aiFilter = await limitedGetGeminiResponse(`
+          This is an api for activities around the world.
+          Return a list of ids of all activities that match the description best.
+          **Return only the perfectly suitable activities for the description!**
+          Do not pick any activity that does not relate to the description in any way 
+          The response must only contain the ids separated by a comma.
+          ${JSON.stringify({
             description,
-            minimumDuration,
-            price,
-            rating,
-            shortDescription,
-            id
-          }) =>
-            ` id:${id},
-          description:${description},
-          minimumDuration:${minimumDuration},
-          price:${price?.amount} ${price?.currencyCode},
-          rating:${rating},
-          shortDescription:${shortDescription}`
-        )}
-          ----------------------------------------
-          `);
-      console.timeEnd('filter');
+            activities: batch.map(
+              ({ description, minimumDuration, price, rating, id, name }) => ({
+                id,
+                name,
+                description,
+                minimumDuration,
+                price,
+                rating
+              })
+            )
+          })}`);
 
-      const filteredIds = aiFilter.split('\n').join().split(',');
-      const filteredActivities = activities.filter(({ id }) =>
-        id ? filteredIds.includes(id) : false
+          console.log(aiFilter);
+
+          const filteredIds = aiFilter.split('\n').join().split(',');
+          const filteredActivities = batch.filter(({ id }) =>
+            id ? filteredIds.includes(id) : false
+          );
+          return filteredActivities;
+        })
       );
 
-      response.status(StatusCodes.OK).send(filteredActivities);
+      console.timeEnd('filter');
+      response.status(StatusCodes.OK).send(
+        results
+          .filter((p) => p.status === 'fulfilled')
+          .map((p) => p.value)
+          .flat()
+      );
     } catch (error) {
       sendError(
         response,
@@ -67,9 +92,11 @@ class ActivityController extends BaseController<IActivity> {
   async getPlaceNames(request: Request, response: Response) {
     const { name } = request.query;
     try {
-      const placeNames = ((await getPlaces(name!.toString())) ?? []).map(
-        ({ city, country }) => `${country}${city ? `, ${city}` : ''}`
-      );
+      const placeNames = ((await getPlaces(name!.toString())) ?? [])
+        .filter((place) =>
+          ['country', 'city'].includes(place?.linkedPlace ?? '')
+        )
+        .map(({ country, city }) => `${country}${city ? `, ${city}` : ''}`);
       response.status(StatusCodes.OK).send(Array.from(new Set(placeNames)));
     } catch (error) {
       sendError(
